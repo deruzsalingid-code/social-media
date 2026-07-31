@@ -7,6 +7,7 @@ import { supabase } from '../lib/supabaseClient';
 const links = [
   { href: '/', label: 'Dashboard' },
   { href: '/calendar', label: 'Kalender konten' },
+  { href: '/production', label: 'Production board' },
   { href: '/brand-guide', label: 'Brand guide' },
   { href: '/trending', label: 'Trending topics' },
   { href: '/competitors', label: 'Kompetitor' },
