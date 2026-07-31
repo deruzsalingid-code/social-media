@@ -24,7 +24,8 @@ const STATUS_COLORS = {
 };
 
 const FORMAT_ICONS = {
-  Reels: Video,
+  'Reels - Talking Head': Video,
+  'Reels - Short Video': Video,
   Carousel: GalleryHorizontal,
   'Single Post': ImageIcon,
 };
