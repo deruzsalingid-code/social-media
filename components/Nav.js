@@ -1,8 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '../lib/supabaseClient';
+import { usePathname } from 'next/navigation';
 
 const links = [
   { href: '/', label: 'Dashboard' },
@@ -15,16 +14,6 @@ const links = [
 
 export default function Nav() {
   const pathname = usePathname();
-  const router = useRouter();
-
-  async function handleLogout() {
-    await supabase.auth.signOut();
-    router.replace('/login');
-  }
-
-  if (pathname === '/login' || pathname === '/reset-password') {
-    return null;
-  }
 
   return (
     <nav className="nav">
@@ -40,9 +29,6 @@ export default function Nav() {
           </Link>
         ))}
       </div>
-      <button className="btn-secondary" onClick={handleLogout}>
-        Keluar
-      </button>
     </nav>
   );
 }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../../components/AuthGate';
 import { supabase } from '../../lib/supabaseClient';
 
 const emptyForm = { name: '', focus: '', notes: '' };
@@ -103,9 +102,5 @@ function CompetitorsContent() {
 }
 
 export default function CompetitorsPage() {
-  return (
-    <AuthGate>
-      <CompetitorsContent />
-    </AuthGate>
-  );
+  return <CompetitorsContent />;
 }

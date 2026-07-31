@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../../components/AuthGate';
 import { supabase } from '../../lib/supabaseClient';
 
 const PILLARS = [
@@ -519,9 +518,5 @@ function CalendarContent() {
 }
 
 export default function CalendarPage() {
-  return (
-    <AuthGate>
-      <CalendarContent />
-    </AuthGate>
-  );
+  return <CalendarContent />;
 }

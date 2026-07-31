@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../../components/AuthGate';
 import { supabase } from '../../lib/supabaseClient';
 
 const emptyForm = { pillar: '', insight: '', source_url: '' };
@@ -115,9 +114,5 @@ function TrendingContent() {
 }
 
 export default function TrendingPage() {
-  return (
-    <AuthGate>
-      <TrendingContent />
-    </AuthGate>
-  );
+  return <TrendingContent />;
 }

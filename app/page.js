@@ -177,9 +177,5 @@ function DashboardContent() {
 }
 
 export default function DashboardPage() {
-  return (
-    <AuthGate>
-      <DashboardContent />
-    </AuthGate>
-  );
+  return <DashboardContent />;
 }

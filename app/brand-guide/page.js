@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../../components/AuthGate';
 import { supabase } from '../../lib/supabaseClient';
 
 function emptyPillar() {
@@ -168,9 +167,5 @@ function BrandGuideContent() {
 }
 
 export default function BrandGuidePage() {
-  return (
-    <AuthGate>
-      <BrandGuideContent />
-    </AuthGate>
-  );
+  return <BrandGuideContent />;
 }

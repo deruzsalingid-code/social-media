@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../../components/AuthGate';
 import { supabase } from '../../lib/supabaseClient';
 
 const PRODUCTION_STATUSES = ['Belum syuting', 'Syuting', 'Editing', 'Siap posting'];
@@ -114,9 +113,5 @@ function ProductionContent() {
 }
 
 export default function ProductionPage() {
-  return (
-    <AuthGate>
-      <ProductionContent />
-    </AuthGate>
-  );
+  return <ProductionContent />;
 }
