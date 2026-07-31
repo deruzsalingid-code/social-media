@@ -18,8 +18,15 @@ const PILLAR_COLORS = {
   'Technology / AI': '#EAE1F7',
 };
 
+const PILLAR_ACCENTS = {
+  'Investasi / Crypto': '#185FA5',
+  'Keuangan Keluarga & Pendidikan Anak': '#E8127A',
+  'Kehidupan di Singapore': '#2FAE64',
+  'Technology / AI': '#7B2FF7',
+};
+
 const STYLES = ['Edukasi', 'Edukasi + Journey', 'Journey / Proteksi', 'Journey (flagship)'];
-const FORMATS = ['Carousel', 'Reels', 'Single Post'];
+const FORMATS = ['Carousel', 'Reels - Talking Head', 'Reels - Short Video', 'Single Post'];
 const STATUSES = ['draft', 'scheduled', 'posted'];
 const PRODUCTION_STATUSES = ['Belum syuting', 'Syuting', 'Editing', 'Siap posting'];
 const APPROVAL_STATUSES = ['Belum direview', 'Revisi', 'Approved'];
@@ -248,7 +255,10 @@ function CalendarContent() {
                       key={item.id}
                       type="button"
                       className="calendar-item-pill"
-                      style={{ background: PILLAR_COLORS[item.pillar] || '#eee' }}
+                      style={{
+                        background: PILLAR_COLORS[item.pillar] || '#eee',
+                        borderLeftColor: PILLAR_ACCENTS[item.pillar] || '#999',
+                      }}
                       onClick={() => startEdit(item)}
                       title={item.topic_hook}
                     >
