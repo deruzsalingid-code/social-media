@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { Users } from 'lucide-react';
 
 const emptyForm = { name: '', focus: '', notes: '' };
 
@@ -41,7 +42,15 @@ function CompetitorsContent() {
 
   return (
     <div>
-      <h1>Kompetitor</h1>
+      <div className="page-header">
+        <div className="page-header-icon">
+          <Users size={20} />
+        </div>
+        <div>
+          <p className="page-header-eyebrow">Benchmark & swipe file</p>
+          <h1>Kompetitor</h1>
+        </div>
+      </div>
 
       <div className="card">
         <h2>Tambah kompetitor</h2>
