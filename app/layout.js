@@ -1,5 +1,5 @@
 import './globals.css';
-import Nav from '../components/Nav';
+import Sidebar from '../components/Sidebar';
 
 export const metadata = {
   title: 'smartmomvestor dashboard',
@@ -10,8 +10,10 @@ export default function RootLayout({ children }) {
   return (
     <html lang="id">
       <body>
-        <Nav />
-        <main className="main-container">{children}</main>
+        <div className="app-shell">
+          <Sidebar />
+          <main className="main-container">{children}</main>
+        </div>
       </body>
     </html>
   );
