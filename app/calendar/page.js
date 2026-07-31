@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { CalendarDays } from 'lucide-react';
 
 const PILLARS = [
   'Investasi / Crypto',
@@ -209,7 +210,15 @@ function CalendarContent() {
 
   return (
     <div>
-      <h1>Kalender konten</h1>
+      <div className="page-header">
+        <div className="page-header-icon">
+          <CalendarDays size={20} />
+        </div>
+        <div>
+          <p className="page-header-eyebrow">Jadwalkan &amp; kelola konten</p>
+          <h1>Kalender konten</h1>
+        </div>
+      </div>
 
       {toast && <div className={toast.isError ? 'toast toast-error' : 'toast toast-success'}>{toast.message}</div>}
 
