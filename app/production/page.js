@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { ListTodo } from 'lucide-react';
 
 const PRODUCTION_STATUSES = ['Belum syuting', 'Syuting', 'Editing', 'Siap posting'];
 
@@ -65,8 +66,16 @@ function ProductionContent() {
 
   return (
     <div>
-      <h1>Production board</h1>
-      <p className="muted" style={{ marginTop: '-12px', marginBottom: '20px' }}>
+      <div className="page-header">
+        <div className="page-header-icon">
+          <ListTodo size={20} />
+        </div>
+        <div>
+          <p className="page-header-eyebrow">Pantau progres syuting & editing</p>
+          <h1>Production board</h1>
+        </div>
+      </div>
+      <p className="muted" style={{ marginTop: '-10px', marginBottom: '20px' }}>
         Drag kartu antar kolom buat update status produksi. Klik kartu buat edit lengkap di halaman Kalender.
       </p>
 
