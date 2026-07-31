@@ -76,6 +76,7 @@ function CalendarContent() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [activeTab, setActiveTab] = useState('ide');
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -127,12 +128,14 @@ function CalendarContent() {
       approval_status: item.approval_status || APPROVAL_STATUSES[0],
     });
     setEditingId(item.id);
+    setActiveTab('ide');
     document.getElementById('content-form')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   function cancelEdit() {
     setForm(emptyForm);
     setEditingId(null);
+    setActiveTab('ide');
   }
 
   async function handleSubmit(e) {
@@ -253,7 +256,32 @@ function CalendarContent() {
 
       <div className="card" id="content-form">
         <h2>{editingId ? 'Edit konten' : 'Tambah konten baru'}</h2>
+        <div className="form-tabs">
+          <button
+            type="button"
+            className={activeTab === 'ide' ? 'form-tab form-tab-active' : 'form-tab'}
+            onClick={() => setActiveTab('ide')}
+          >
+            1. Ide &amp; konten
+          </button>
+          <button
+            type="button"
+            className={activeTab === 'produksi' ? 'form-tab form-tab-active' : 'form-tab'}
+            onClick={() => setActiveTab('produksi')}
+          >
+            2. Script &amp; produksi
+          </button>
+          <button
+            type="button"
+            className={activeTab === 'tracking' ? 'form-tab form-tab-active' : 'form-tab'}
+            onClick={() => setActiveTab('tracking')}
+          >
+            3. Tracking
+          </button>
+        </div>
         <form onSubmit={handleSubmit} className="grid-form">
+          {activeTab === 'ide' && (
+            <>
           <label className="form-group">
             <span>Tanggal posting</span>
             <input
@@ -308,11 +336,11 @@ function CalendarContent() {
             <span>Hashtag</span>
             <input type="text" value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)} />
           </label>
+            </>
+          )}
 
-          <div className="form-group-wide section-divider">
-            <h3>Script &amp; produksi</h3>
-          </div>
-
+          {activeTab === 'produksi' && (
+            <>
           <label className="form-group form-group-wide">
             <span>Script lengkap (talking head) / detail slide (carousel)</span>
             <textarea
@@ -345,11 +373,11 @@ function CalendarContent() {
               onChange={(e) => handleChange('editing_notes', e.target.value)}
             />
           </label>
+            </>
+          )}
 
-          <div className="form-group-wide section-divider">
-            <h3>Production tracking</h3>
-          </div>
-
+          {activeTab === 'tracking' && (
+            <>
           <label className="form-group">
             <span>Status produksi</span>
             <select value={form.production_status} onChange={(e) => handleChange('production_status', e.target.value)}>
@@ -398,6 +426,8 @@ function CalendarContent() {
               onChange={(e) => handleChange('published_url', e.target.value)}
             />
           </label>
+            </>
+          )}
 
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? 'Menyimpan...' : editingId ? 'Update konten' : 'Simpan konten'}
@@ -433,11 +463,11 @@ function CalendarContent() {
             <tbody>
               {items.map((item) => (
                 <tr key={item.id}>
-                  <td>{item.scheduled_date ?? '-'}</td>
-                  <td>{item.pillar}</td>
-                  <td>{item.format}</td>
-                  <td>{item.topic_hook}</td>
-                  <td>
+                  <td data-label="Tanggal">{item.scheduled_date ?? '-'}</td>
+                  <td data-label="Pilar">{item.pillar}</td>
+                  <td data-label="Format">{item.format}</td>
+                  <td data-label="Topik">{item.topic_hook}</td>
+                  <td data-label="Produksi">
                     <select
                       value={item.production_status || PRODUCTION_STATUSES[0]}
                       onChange={(e) => updateField(item.id, 'production_status', e.target.value)}
@@ -449,7 +479,7 @@ function CalendarContent() {
                       ))}
                     </select>
                   </td>
-                  <td>
+                  <td data-label="Approval">
                     <select
                       value={item.approval_status || APPROVAL_STATUSES[0]}
                       onChange={(e) => updateField(item.id, 'approval_status', e.target.value)}
@@ -461,7 +491,7 @@ function CalendarContent() {
                       ))}
                     </select>
                   </td>
-                  <td>
+                  <td data-label="Status">
                     <select value={item.status} onChange={(e) => updateField(item.id, 'status', e.target.value)}>
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>
@@ -470,7 +500,7 @@ function CalendarContent() {
                       ))}
                     </select>
                   </td>
-                  <td>
+                  <td data-label="Aksi">
                     <button className="link-button" style={{ marginRight: '10px' }} onClick={() => startEdit(item)}>
                       Edit
                     </button>
