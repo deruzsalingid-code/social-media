@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { Palette } from 'lucide-react';
 
 function emptyPillar() {
   return { name: '', percentage: '', description: '' };
@@ -75,7 +76,15 @@ function BrandGuideContent() {
 
   return (
     <div>
-      <h1>Brand guide</h1>
+      <div className="page-header">
+        <div className="page-header-icon">
+          <Palette size={20} />
+        </div>
+        <div>
+          <p className="page-header-eyebrow">Satu sumber kebenaran identitas brand</p>
+          <h1>Brand guide</h1>
+        </div>
+      </div>
       <form onSubmit={handleSave}>
         <div className="card">
           <h2>Positioning statement</h2>
