@@ -11,6 +11,13 @@ const PILLARS = [
   'Technology / AI',
 ];
 
+const PILLAR_COLORS = {
+  'Investasi / Crypto': '#D9E8FB',
+  'Keuangan Keluarga & Pendidikan Anak': '#FCE4EC',
+  'Kehidupan di Singapore': '#E1F3E1',
+  'Technology / AI': '#EAE1F7',
+};
+
 const STYLES = ['Edukasi', 'Edukasi + Journey', 'Journey / Proteksi', 'Journey (flagship)'];
 const FORMATS = ['Carousel', 'Reels', 'Single Post'];
 const STATUSES = ['draft', 'scheduled', 'posted'];
@@ -24,6 +31,11 @@ const emptyForm = {
   format: FORMATS[0],
   topic_hook: '',
   breakdown: '',
+  script_full: '',
+  shot_list: '',
+  wardrobe_notes: '',
+  music_notes: '',
+  editing_notes: '',
   caption: '',
   hashtags: '',
   status: 'draft',
@@ -35,12 +47,38 @@ const emptyForm = {
   approval_status: APPROVAL_STATUSES[0],
 };
 
+function buildMonthGrid(year, month) {
+  const firstDay = new Date(year, month, 1);
+  const startWeekday = firstDay.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const cells = [];
+  for (let i = 0; i < startWeekday; i++) {
+    cells.push(null);
+  }
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    cells.push(dateStr);
+  }
+  while (cells.length % 7 !== 0) {
+    cells.push(null);
+  }
+  const weeks = [];
+  for (let i = 0; i < cells.length; i += 7) {
+    weeks.push(cells.slice(i, i + 7));
+  }
+  return weeks;
+}
+
 function CalendarContent() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [toast, setToast] = useState(null);
+  const today = new Date();
+  const [viewYear, setViewYear] = useState(today.getFullYear());
+  const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   async function loadItems() {
     setLoading(true);
@@ -56,6 +94,11 @@ function CalendarContent() {
     loadItems();
   }, []);
 
+  function showToast(message, isError) {
+    setToast({ message, isError: !!isError });
+    setTimeout(() => setToast(null), 2500);
+  }
+
   function handleChange(field, value) {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
@@ -68,6 +111,11 @@ function CalendarContent() {
       format: item.format || FORMATS[0],
       topic_hook: item.topic_hook || '',
       breakdown: item.breakdown || '',
+      script_full: item.script_full || '',
+      shot_list: item.shot_list || '',
+      wardrobe_notes: item.wardrobe_notes || '',
+      music_notes: item.music_notes || '',
+      editing_notes: item.editing_notes || '',
       caption: item.caption || '',
       hashtags: item.hashtags || '',
       status: item.status || 'draft',
@@ -79,7 +127,7 @@ function CalendarContent() {
       approval_status: item.approval_status || APPROVAL_STATUSES[0],
     });
     setEditingId(item.id);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('content-form')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   function cancelEdit() {
@@ -95,32 +143,115 @@ function CalendarContent() {
       scheduled_date: form.scheduled_date || null,
       production_deadline: form.production_deadline || null,
     };
-    if (editingId) {
-      await supabase.from('content_items').update(payload).eq('id', editingId);
-    } else {
-      await supabase.from('content_items').insert(payload);
+    const { error } = editingId
+      ? await supabase.from('content_items').update(payload).eq('id', editingId)
+      : await supabase.from('content_items').insert(payload);
+    setSaving(false);
+    if (error) {
+      showToast('Gagal menyimpan: ' + error.message, true);
+      return;
     }
+    showToast(editingId ? 'Konten berhasil diupdate' : 'Konten berhasil disimpan', false);
     setForm(emptyForm);
     setEditingId(null);
-    setSaving(false);
     loadItems();
   }
 
   async function updateField(id, field, value) {
-    await supabase.from('content_items').update({ [field]: value }).eq('id', id);
+    const { error } = await supabase.from('content_items').update({ [field]: value }).eq('id', id);
+    if (error) {
+      showToast('Gagal update: ' + error.message, true);
+    }
     loadItems();
   }
 
   async function deleteItem(id) {
-    await supabase.from('content_items').delete().eq('id', id);
+    const { error } = await supabase.from('content_items').delete().eq('id', id);
+    if (error) {
+      showToast('Gagal hapus: ' + error.message, true);
+    } else {
+      showToast('Konten dihapus', false);
+    }
     loadItems();
   }
+
+  function goPrevMonth() {
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear(viewYear - 1);
+    } else {
+      setViewMonth(viewMonth - 1);
+    }
+  }
+
+  function goNextMonth() {
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear(viewYear + 1);
+    } else {
+      setViewMonth(viewMonth + 1);
+    }
+  }
+
+  const weeks = buildMonthGrid(viewYear, viewMonth);
+  const monthLabel = new Date(viewYear, viewMonth, 1).toLocaleDateString('id-ID', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const itemsByDate = {};
+  items.forEach((item) => {
+    if (!item.scheduled_date) return;
+    if (!itemsByDate[item.scheduled_date]) itemsByDate[item.scheduled_date] = [];
+    itemsByDate[item.scheduled_date].push(item);
+  });
 
   return (
     <div>
       <h1>Kalender konten</h1>
 
+      {toast && <div className={toast.isError ? 'toast toast-error' : 'toast toast-success'}>{toast.message}</div>}
+
       <div className="card">
+        <div className="calendar-header">
+          <button type="button" className="btn-secondary-light" onClick={goPrevMonth}>
+            &larr;
+          </button>
+          <h2 style={{ margin: 0 }}>{monthLabel}</h2>
+          <button type="button" className="btn-secondary-light" onClick={goNextMonth}>
+            &rarr;
+          </button>
+        </div>
+        <div className="calendar-grid">
+          {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map((d) => (
+            <div key={d} className="calendar-day-label">
+              {d}
+            </div>
+          ))}
+          {weeks.flat().map((dateStr, idx) => (
+            <div key={idx} className={dateStr ? 'calendar-cell' : 'calendar-cell calendar-cell-empty'}>
+              {dateStr && (
+                <>
+                  <div className="calendar-date-number">{parseInt(dateStr.slice(-2), 10)}</div>
+                  {(itemsByDate[dateStr] || []).map((item) => (
+                    <button
+                      key={item.id}
+                      type="button"
+                      className="calendar-item-pill"
+                      style={{ background: PILLAR_COLORS[item.pillar] || '#eee' }}
+                      onClick={() => startEdit(item)}
+                      title={item.topic_hook}
+                    >
+                      {item.topic_hook}
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="card" id="content-form">
         <h2>{editingId ? 'Edit konten' : 'Tambah konten baru'}</h2>
         <form onSubmit={handleSubmit} className="grid-form">
           <label className="form-group">
@@ -166,8 +297,8 @@ function CalendarContent() {
             <input type="text" value={form.topic_hook} onChange={(e) => handleChange('topic_hook', e.target.value)} />
           </label>
           <label className="form-group form-group-wide">
-            <span>Breakdown konten (slide/script)</span>
-            <textarea rows="4" value={form.breakdown} onChange={(e) => handleChange('breakdown', e.target.value)} />
+            <span>Outline / timing (ringkas)</span>
+            <textarea rows="3" value={form.breakdown} onChange={(e) => handleChange('breakdown', e.target.value)} />
           </label>
           <label className="form-group form-group-wide">
             <span>Caption</span>
@@ -178,8 +309,45 @@ function CalendarContent() {
             <input type="text" value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)} />
           </label>
 
-          <div className="form-group-wide" style={{ borderTop: '1px solid #eee', margin: '8px 0', paddingTop: '12px' }}>
-            <h3 style={{ margin: '0 0 4px', fontSize: '15px' }}>Production</h3>
+          <div className="form-group-wide section-divider">
+            <h3>Script &amp; produksi</h3>
+          </div>
+
+          <label className="form-group form-group-wide">
+            <span>Script lengkap (talking head) / detail slide (carousel)</span>
+            <textarea
+              rows="4"
+              value={form.script_full}
+              onChange={(e) => handleChange('script_full', e.target.value)}
+            />
+          </label>
+          <label className="form-group form-group-wide">
+            <span>Shot list (lokasi, angle, b-roll)</span>
+            <textarea rows="3" value={form.shot_list} onChange={(e) => handleChange('shot_list', e.target.value)} />
+          </label>
+          <label className="form-group">
+            <span>Wardrobe</span>
+            <input
+              type="text"
+              value={form.wardrobe_notes}
+              onChange={(e) => handleChange('wardrobe_notes', e.target.value)}
+            />
+          </label>
+          <label className="form-group">
+            <span>Musik</span>
+            <input type="text" value={form.music_notes} onChange={(e) => handleChange('music_notes', e.target.value)} />
+          </label>
+          <label className="form-group form-group-wide">
+            <span>Catatan editing</span>
+            <textarea
+              rows="3"
+              value={form.editing_notes}
+              onChange={(e) => handleChange('editing_notes', e.target.value)}
+            />
+          </label>
+
+          <div className="form-group-wide section-divider">
+            <h3>Production tracking</h3>
           </div>
 
           <label className="form-group">
