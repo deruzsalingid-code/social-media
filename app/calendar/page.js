@@ -14,6 +14,8 @@ const PILLARS = [
 const STYLES = ['Edukasi', 'Edukasi + Journey', 'Journey / Proteksi', 'Journey (flagship)'];
 const FORMATS = ['Carousel', 'Reels', 'Single Post'];
 const STATUSES = ['draft', 'scheduled', 'posted'];
+const PRODUCTION_STATUSES = ['Belum syuting', 'Syuting', 'Editing', 'Siap posting'];
+const APPROVAL_STATUSES = ['Belum direview', 'Revisi', 'Approved'];
 
 const emptyForm = {
   scheduled_date: '',
@@ -25,6 +27,12 @@ const emptyForm = {
   caption: '',
   hashtags: '',
   status: 'draft',
+  production_status: PRODUCTION_STATUSES[0],
+  production_deadline: '',
+  raw_file_url: '',
+  edited_file_url: '',
+  published_url: '',
+  approval_status: APPROVAL_STATUSES[0],
 };
 
 function CalendarContent() {
@@ -57,14 +65,15 @@ function CalendarContent() {
     await supabase.from('content_items').insert({
       ...form,
       scheduled_date: form.scheduled_date || null,
+      production_deadline: form.production_deadline || null,
     });
     setForm(emptyForm);
     setSaving(false);
     loadItems();
   }
 
-  async function updateStatus(id, status) {
-    await supabase.from('content_items').update({ status }).eq('id', id);
+  async function updateField(id, field, value) {
+    await supabase.from('content_items').update({ [field]: value }).eq('id', id);
     loadItems();
   }
 
@@ -134,6 +143,60 @@ function CalendarContent() {
             <span>Hashtag</span>
             <input type="text" value={form.hashtags} onChange={(e) => handleChange('hashtags', e.target.value)} />
           </label>
+
+          <div className="form-group-wide" style={{ borderTop: '1px solid #eee', margin: '8px 0', paddingTop: '12px' }}>
+            <h3 style={{ margin: '0 0 4px', fontSize: '15px' }}>Production</h3>
+          </div>
+
+          <label className="form-group">
+            <span>Status produksi</span>
+            <select value={form.production_status} onChange={(e) => handleChange('production_status', e.target.value)}>
+              {PRODUCTION_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-group">
+            <span>Deadline produksi</span>
+            <input
+              type="date"
+              value={form.production_deadline}
+              onChange={(e) => handleChange('production_deadline', e.target.value)}
+            />
+          </label>
+          <label className="form-group">
+            <span>Approval</span>
+            <select value={form.approval_status} onChange={(e) => handleChange('approval_status', e.target.value)}>
+              {APPROVAL_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="form-group form-group-wide">
+            <span>Link file mentah (Drive/Canva)</span>
+            <input type="text" value={form.raw_file_url} onChange={(e) => handleChange('raw_file_url', e.target.value)} />
+          </label>
+          <label className="form-group form-group-wide">
+            <span>Link hasil edit final</span>
+            <input
+              type="text"
+              value={form.edited_file_url}
+              onChange={(e) => handleChange('edited_file_url', e.target.value)}
+            />
+          </label>
+          <label className="form-group form-group-wide">
+            <span>Link postingan asli (setelah tayang)</span>
+            <input
+              type="text"
+              value={form.published_url}
+              onChange={(e) => handleChange('published_url', e.target.value)}
+            />
+          </label>
+
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? 'Menyimpan...' : 'Simpan konten'}
           </button>
@@ -154,6 +217,8 @@ function CalendarContent() {
                 <th>Pilar</th>
                 <th>Format</th>
                 <th>Topik</th>
+                <th>Produksi</th>
+                <th>Approval</th>
                 <th>Status</th>
                 <th></th>
               </tr>
@@ -166,7 +231,31 @@ function CalendarContent() {
                   <td>{item.format}</td>
                   <td>{item.topic_hook}</td>
                   <td>
-                    <select value={item.status} onChange={(e) => updateStatus(item.id, e.target.value)}>
+                    <select
+                      value={item.production_status || PRODUCTION_STATUSES[0]}
+                      onChange={(e) => updateField(item.id, 'production_status', e.target.value)}
+                    >
+                      {PRODUCTION_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <select
+                      value={item.approval_status || APPROVAL_STATUSES[0]}
+                      onChange={(e) => updateField(item.id, 'approval_status', e.target.value)}
+                    >
+                      {APPROVAL_STATUSES.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <select value={item.status} onChange={(e) => updateField(item.id, 'status', e.target.value)}>
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>
                           {s}
