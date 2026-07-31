@@ -40,6 +40,7 @@ function CalendarContent() {
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [editingId, setEditingId] = useState(null);
 
   async function loadItems() {
     setLoading(true);
@@ -59,15 +60,48 @@ function CalendarContent() {
     setForm((prev) => ({ ...prev, [field]: value }));
   }
 
+  function startEdit(item) {
+    setForm({
+      scheduled_date: item.scheduled_date || '',
+      pillar: item.pillar || PILLARS[0],
+      content_style: item.content_style || STYLES[0],
+      format: item.format || FORMATS[0],
+      topic_hook: item.topic_hook || '',
+      breakdown: item.breakdown || '',
+      caption: item.caption || '',
+      hashtags: item.hashtags || '',
+      status: item.status || 'draft',
+      production_status: item.production_status || PRODUCTION_STATUSES[0],
+      production_deadline: item.production_deadline || '',
+      raw_file_url: item.raw_file_url || '',
+      edited_file_url: item.edited_file_url || '',
+      published_url: item.published_url || '',
+      approval_status: item.approval_status || APPROVAL_STATUSES[0],
+    });
+    setEditingId(item.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    setForm(emptyForm);
+    setEditingId(null);
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setSaving(true);
-    await supabase.from('content_items').insert({
+    const payload = {
       ...form,
       scheduled_date: form.scheduled_date || null,
       production_deadline: form.production_deadline || null,
-    });
+    };
+    if (editingId) {
+      await supabase.from('content_items').update(payload).eq('id', editingId);
+    } else {
+      await supabase.from('content_items').insert(payload);
+    }
     setForm(emptyForm);
+    setEditingId(null);
     setSaving(false);
     loadItems();
   }
@@ -87,7 +121,7 @@ function CalendarContent() {
       <h1>Kalender konten</h1>
 
       <div className="card">
-        <h2>Tambah konten baru</h2>
+        <h2>{editingId ? 'Edit konten' : 'Tambah konten baru'}</h2>
         <form onSubmit={handleSubmit} className="grid-form">
           <label className="form-group">
             <span>Tanggal posting</span>
@@ -198,8 +232,13 @@ function CalendarContent() {
           </label>
 
           <button type="submit" className="btn-primary" disabled={saving}>
-            {saving ? 'Menyimpan...' : 'Simpan konten'}
+            {saving ? 'Menyimpan...' : editingId ? 'Update konten' : 'Simpan konten'}
           </button>
+          {editingId && (
+            <button type="button" className="btn-danger-text" style={{ marginLeft: '12px' }} onClick={cancelEdit}>
+              Batal edit
+            </button>
+          )}
         </form>
       </div>
 
@@ -264,6 +303,9 @@ function CalendarContent() {
                     </select>
                   </td>
                   <td>
+                    <button className="link-button" style={{ marginRight: '10px' }} onClick={() => startEdit(item)}>
+                      Edit
+                    </button>
                     <button className="btn-danger-text" onClick={() => deleteItem(item.id)}>
                       Hapus
                     </button>
