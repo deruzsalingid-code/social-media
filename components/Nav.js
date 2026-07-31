@@ -21,7 +21,7 @@ export default function Nav() {
     router.replace('/login');
   }
 
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/reset-password') {
     return null;
   }
 

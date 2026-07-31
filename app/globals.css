@@ -227,3 +227,13 @@ textarea {
   text-align: center;
   color: #888;
 }
+
+.link-button {
+  background: none;
+  border: none;
+  color: #e8127a;
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0;
+}
