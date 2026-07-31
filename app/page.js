@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import AuthGate from '../components/AuthGate';
 import { supabase } from '../lib/supabaseClient';
+import { Users, Flame, Heart, MessageCircle, Video, GalleryHorizontal, Image as ImageIcon, ArrowUpRight } from 'lucide-react';
 
 const emptyForm = {
   snapshot_date: '',
@@ -15,24 +15,53 @@ const emptyForm = {
   notes: '',
 };
 
+const PRODUCTION_STATUSES = ['Belum syuting', 'Syuting', 'Editing', 'Siap posting'];
+const STATUS_COLORS = {
+  'Belum syuting': '#E0DED6',
+  Syuting: '#E8127A',
+  Editing: '#7B2FF7',
+  'Siap posting': '#2FAE64',
+};
+
+const FORMAT_ICONS = {
+  Reels: Video,
+  Carousel: GalleryHorizontal,
+  'Single Post': ImageIcon,
+};
+
+function buildDonutGradient(counts) {
+  const total = counts.reduce((sum, c) => sum + c.value, 0);
+  if (total === 0) return '#eee';
+  let cumulative = 0;
+  const stops = counts.map((c) => {
+    const start = (cumulative / total) * 100;
+    cumulative += c.value;
+    const end = (cumulative / total) * 100;
+    return `${c.color} ${start}% ${end}%`;
+  });
+  return `conic-gradient(${stops.join(', ')})`;
+}
+
 function DashboardContent() {
   const [snapshots, setSnapshots] = useState([]);
+  const [contentItems, setContentItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState(emptyForm);
   const [saving, setSaving] = useState(false);
 
-  async function loadSnapshots() {
+  async function loadData() {
     setLoading(true);
-    const { data } = await supabase
-      .from('growth_snapshots')
-      .select('*')
-      .order('snapshot_date', { ascending: false });
-    setSnapshots(data || []);
+    const [{ data: snapshotData }, { data: contentData }] = await Promise.all([
+      supabase.from('growth_snapshots').select('*').order('snapshot_date', { ascending: false }),
+      supabase.from('content_items').select('*').order('scheduled_date', { ascending: true }),
+    ]);
+    setSnapshots(snapshotData || []);
+    setContentItems(contentData || []);
     setLoading(false);
   }
 
   useEffect(() => {
-    loadSnapshots();
+    loadData();
   }, []);
 
   function handleChange(field, value) {
@@ -54,38 +83,117 @@ function DashboardContent() {
     });
     setForm(emptyForm);
     setSaving(false);
-    loadSnapshots();
+    loadData();
   }
 
   const latest = snapshots[0];
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = contentItems.filter((it) => it.scheduled_date && it.scheduled_date >= today).slice(0, 4);
+
+  const productionCounts = PRODUCTION_STATUSES.map((status) => ({
+    label: status,
+    value: contentItems.filter((it) => (it.production_status || PRODUCTION_STATUSES[0]) === status).length,
+    color: STATUS_COLORS[status],
+  }));
+  const donutBackground = buildDonutGradient(productionCounts);
 
   return (
     <div>
-      <h1>Dashboard growth</h1>
+      <div className="hero-banner">
+        <div className="hero-badge">smartmomvestor</div>
+        <h1 className="hero-title">Dashboard growth &amp; produksi</h1>
+        <p className="hero-subtitle">Pantau performa akun dan progres konten dalam satu tempat</p>
+      </div>
 
-      {latest && (
-        <div className="stat-grid">
-          <div className="stat-card">
-            <span className="stat-label">Followers</span>
-            <span className="stat-value">{latest.followers ?? '-'}</span>
+      <div className="stat-grid-v2">
+        <div className="stat-card-v2">
+          <div className="stat-icon" style={{ background: '#FCE4EC', color: '#E8127A' }}>
+            <Users size={18} />
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Engagement rate</span>
-            <span className="stat-value">{latest.engagement_rate ?? '-'}%</span>
+          <span className="stat-label">Followers</span>
+          <span className="stat-value">{latest?.followers ?? '-'}</span>
+        </div>
+        <div className="stat-card-v2">
+          <div className="stat-icon" style={{ background: '#EAE1F7', color: '#7B2FF7' }}>
+            <Flame size={18} />
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Rata-rata likes</span>
-            <span className="stat-value">{latest.avg_likes ?? '-'}</span>
+          <span className="stat-label">Engagement rate</span>
+          <span className="stat-value">{latest?.engagement_rate ?? '-'}%</span>
+        </div>
+        <div className="stat-card-v2">
+          <div className="stat-icon" style={{ background: '#D9E8FB', color: '#185FA5' }}>
+            <Heart size={18} />
           </div>
-          <div className="stat-card">
-            <span className="stat-label">Rata-rata komentar</span>
-            <span className="stat-value">{latest.avg_comments ?? '-'}</span>
+          <span className="stat-label">Rata-rata likes</span>
+          <span className="stat-value">{latest?.avg_likes ?? '-'}</span>
+        </div>
+        <div className="stat-card-v2">
+          <div className="stat-icon" style={{ background: '#E1F3E1', color: '#2FAE64' }}>
+            <MessageCircle size={18} />
+          </div>
+          <span className="stat-label">Rata-rata komentar</span>
+          <span className="stat-value">{latest?.avg_comments ?? '-'}</span>
+        </div>
+      </div>
+
+      <div className="dashboard-grid">
+        <div className="card card-v2">
+          <div className="card-v2-header">
+            <h2>Konten mendatang</h2>
+            <a href="/calendar" className="icon-link">
+              <ArrowUpRight size={16} />
+            </a>
+          </div>
+          {loading ? (
+            <p className="muted">Memuat...</p>
+          ) : upcoming.length === 0 ? (
+            <p className="muted">Nggak ada konten terjadwal. Tambahin di Kalender.</p>
+          ) : (
+            <div className="task-list">
+              {upcoming.map((item) => {
+                const Icon = FORMAT_ICONS[item.format] || Video;
+                return (
+                  <div className="task-item" key={item.id}>
+                    <div className="task-icon">
+                      <Icon size={16} />
+                    </div>
+                    <div className="task-item-body">
+                      <p className="task-item-title">{item.topic_hook || '(tanpa judul)'}</p>
+                      <p className="task-item-meta">
+                        {item.scheduled_date} &middot; {item.production_status || 'Belum syuting'}
+                      </p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        <div className="card card-v2">
+          <div className="card-v2-header">
+            <h2>Status produksi</h2>
+          </div>
+          <div className="donut-wrap">
+            <div className="donut" style={{ background: donutBackground }}>
+              <div className="donut-hole">{contentItems.length}</div>
+            </div>
+            <div className="donut-legend">
+              {productionCounts.map((c) => (
+                <div className="donut-legend-item" key={c.label}>
+                  <span className="donut-dot" style={{ background: c.color }} />
+                  {c.label}: {c.value}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
-      )}
+      </div>
 
-      <div className="card">
-        <h2>Tambah snapshot baru</h2>
+      <div className="card card-v2">
+        <div className="card-v2-header">
+          <h2>Tambah snapshot baru</h2>
+        </div>
         <form onSubmit={handleSubmit} className="grid-form">
           <label className="form-group">
             <span>Tanggal</span>
@@ -139,8 +247,10 @@ function DashboardContent() {
         </form>
       </div>
 
-      <div className="card">
-        <h2>Riwayat snapshot</h2>
+      <div className="card card-v2">
+        <div className="card-v2-header">
+          <h2>Riwayat snapshot</h2>
+        </div>
         {loading ? (
           <p className="muted">Memuat...</p>
         ) : snapshots.length === 0 ? (
@@ -160,12 +270,12 @@ function DashboardContent() {
             <tbody>
               {snapshots.map((s) => (
                 <tr key={s.id}>
-                  <td>{s.snapshot_date}</td>
-                  <td>{s.followers ?? '-'}</td>
-                  <td>{s.engagement_rate ?? '-'}%</td>
-                  <td>{s.avg_likes ?? '-'}</td>
-                  <td>{s.avg_comments ?? '-'}</td>
-                  <td>{s.notes ?? '-'}</td>
+                  <td data-label="Tanggal">{s.snapshot_date}</td>
+                  <td data-label="Followers">{s.followers ?? '-'}</td>
+                  <td data-label="ER">{s.engagement_rate ?? '-'}%</td>
+                  <td data-label="Avg likes">{s.avg_likes ?? '-'}</td>
+                  <td data-label="Avg komentar">{s.avg_comments ?? '-'}</td>
+                  <td data-label="Catatan">{s.notes ?? '-'}</td>
                 </tr>
               ))}
             </tbody>
