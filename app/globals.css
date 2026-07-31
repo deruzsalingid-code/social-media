@@ -249,6 +249,78 @@ textarea {
   font-size: 15px;
 }
 
+.form-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 8px 4px 10px;
+  margin-right: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+}
+
+.form-tab-active {
+  color: #e8127a;
+  border-bottom-color: #e8127a;
+}
+
+@media (max-width: 720px) {
+  .calendar-cell {
+    min-height: 60px;
+    padding: 3px;
+  }
+  .calendar-date-number {
+    font-size: 10px;
+  }
+  .calendar-item-pill {
+    font-size: 9px;
+    padding: 2px 3px;
+  }
+  .form-tabs {
+    overflow-x: auto;
+  }
+  .form-tab {
+    white-space: nowrap;
+  }
+  .table thead {
+    display: none;
+  }
+  .table,
+  .table tbody,
+  .table tr,
+  .table td {
+    display: block;
+    width: 100%;
+  }
+  .table tr {
+    border: 1px solid #eee;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+  }
+  .table td {
+    border: none;
+    padding: 6px 0;
+  }
+  .table td::before {
+    content: attr(data-label);
+    display: block;
+    font-size: 11px;
+    font-weight: 700;
+    color: #999;
+    margin-bottom: 2px;
+  }
+}
+
 .toast {
   position: fixed;
   top: 20px;
