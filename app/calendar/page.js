@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import { CalendarDays } from 'lucide-react';
+import { CalendarDays, X, BookOpenText } from 'lucide-react';
 
 const PILLARS = [
   'Investasi / Crypto',
@@ -84,6 +84,7 @@ function CalendarContent() {
   const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState(null);
   const [activeTab, setActiveTab] = useState('ide');
+  const [viewingScript, setViewingScript] = useState(null);
   const today = new Date();
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
@@ -362,11 +363,16 @@ function CalendarContent() {
           <label className="form-group form-group-wide">
             <span>Script lengkap (talking head) / detail slide (carousel)</span>
             <textarea
-              rows="4"
+              rows="14"
+              className="script-textarea"
               value={form.script_full}
               onChange={(e) => handleChange('script_full', e.target.value)}
             />
           </label>
+          <p className="muted script-preview-hint">
+            Tips: setelah disimpan, klik &quot;Lihat script&quot; di daftar konten buat baca versi rapi &amp; besar
+            (cocok buat dijadiin contekan pas syuting).
+          </p>
           <label className="form-group form-group-wide">
             <span>Shot list (lokasi, angle, b-roll)</span>
             <textarea rows="3" value={form.shot_list} onChange={(e) => handleChange('shot_list', e.target.value)} />
@@ -519,6 +525,13 @@ function CalendarContent() {
                     </select>
                   </td>
                   <td data-label="Aksi">
+                    <button
+                      className="link-button"
+                      style={{ marginRight: '10px' }}
+                      onClick={() => setViewingScript(item)}
+                    >
+                      Lihat script
+                    </button>
                     <button className="link-button" style={{ marginRight: '10px' }} onClick={() => startEdit(item)}>
                       Edit
                     </button>
@@ -532,6 +545,78 @@ function CalendarContent() {
           </table>
         )}
       </div>
+
+      {viewingScript && (
+        <div className="script-modal-overlay" onClick={() => setViewingScript(null)}>
+          <div className="script-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="script-modal-header">
+              <div className="script-modal-badges">
+                <span
+                  className="script-modal-pillar-badge"
+                  style={{
+                    background: PILLAR_COLORS[viewingScript.pillar] || '#eee',
+                    color: PILLAR_ACCENTS[viewingScript.pillar] || '#555',
+                  }}
+                >
+                  {viewingScript.pillar}
+                </span>
+                <span className="script-modal-format-badge">{viewingScript.format}</span>
+                {viewingScript.scheduled_date && (
+                  <span className="script-modal-date-badge">{viewingScript.scheduled_date}</span>
+                )}
+              </div>
+              <button
+                className="script-modal-close"
+                onClick={() => setViewingScript(null)}
+                aria-label="Tutup"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <h2 className="script-modal-title">{viewingScript.topic_hook || '(tanpa judul)'}</h2>
+
+            <div className="script-modal-body">
+              {viewingScript.script_full ? (
+                viewingScript.script_full.split('\n').map((line, i) =>
+                  line.trim() === '' ? <div key={i} className="script-modal-spacer" /> : <p key={i}>{line}</p>
+                )
+              ) : (
+                <p className="muted">Belum ada script. Isi lewat tombol Edit.</p>
+              )}
+            </div>
+
+            {(viewingScript.shot_list || viewingScript.wardrobe_notes || viewingScript.music_notes || viewingScript.editing_notes) && (
+              <div className="script-modal-meta">
+                {viewingScript.shot_list && (
+                  <div className="script-modal-meta-row">
+                    <span className="script-modal-meta-label">Shot list</span>
+                    <span>{viewingScript.shot_list}</span>
+                  </div>
+                )}
+                {viewingScript.wardrobe_notes && (
+                  <div className="script-modal-meta-row">
+                    <span className="script-modal-meta-label">Wardrobe</span>
+                    <span>{viewingScript.wardrobe_notes}</span>
+                  </div>
+                )}
+                {viewingScript.music_notes && (
+                  <div className="script-modal-meta-row">
+                    <span className="script-modal-meta-label">Musik</span>
+                    <span>{viewingScript.music_notes}</span>
+                  </div>
+                )}
+                {viewingScript.editing_notes && (
+                  <div className="script-modal-meta-row">
+                    <span className="script-modal-meta-label">Editing</span>
+                    <span>{viewingScript.editing_notes}</span>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
