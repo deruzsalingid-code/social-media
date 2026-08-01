@@ -521,6 +521,150 @@ textarea {
   padding: 0;
 }
 
+.script-textarea {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.script-preview-hint {
+  grid-column: 1 / -1;
+  margin: -8px 0 4px;
+  font-size: 12px;
+}
+
+.script-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 15, 10, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 2000;
+}
+
+.script-modal {
+  background: #fffdf9;
+  border-radius: 24px;
+  max-width: 680px;
+  width: 100%;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 28px 32px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+
+.script-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.script-modal-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.script-modal-pillar-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.script-modal-format-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.script-modal-date-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f1efe8;
+  color: #666;
+}
+
+.script-modal-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #eee;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.script-modal-close:hover {
+  background: #f5f5f5;
+}
+
+.script-modal-title {
+  font-size: 22px;
+  line-height: 1.3;
+  margin: 0 0 20px;
+}
+
+.script-modal-body {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 19px;
+  line-height: 1.75;
+  color: #1a1a1a;
+}
+
+.script-modal-body p {
+  margin: 0 0 14px;
+}
+
+.script-modal-spacer {
+  height: 6px;
+}
+
+.script-modal-meta {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.script-modal-meta-row {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+  color: #555;
+}
+
+.script-modal-meta-label {
+  flex-shrink: 0;
+  width: 84px;
+  font-weight: 700;
+  color: #1a1a1a;
+}
+
+@media (max-width: 640px) {
+  .script-modal {
+    padding: 22px 20px 26px;
+    border-radius: 18px;
+  }
+  .script-modal-body {
+    font-size: 17px;
+  }
+}
+
 .section-divider {
   border-top: 1px solid #eee;
   margin: 8px 0;
